@@ -1,0 +1,75 @@
+# ============================================
+# Docker Ignore File for WU-S
+# ============================================
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Testing
+coverage
+.nyc_output
+
+# Environment files (use Docker secrets or env vars)
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+
+# IDE and editor
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git
+.gitignore
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+
+# Documentation
+README.md
+CLAUDE.md
+*.md
+!prisma/*.md
+
+# Docker files (prevent recursive copy)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# GitHub
+.github
+
+# Claude
+.claude
+
+# Test and debug files
+test-*.js
+debug-*.js
+*.html
+scripts
+*.bak-*
+live-test-*.md
+TIMELINE.md
+
+# Misc
+*.log
+.turbo

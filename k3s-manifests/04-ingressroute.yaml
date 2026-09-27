@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wu-s
+  namespace: wu-s
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`wu-unl.likezara.com`)
+      kind: Rule
+      middlewares:
+        - name: wu-s-force-https
+      services:
+        - name: wu-s
+          port: 80

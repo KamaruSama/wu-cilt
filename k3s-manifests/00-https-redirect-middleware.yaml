@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: wu-s-force-https
+  namespace: wu-s
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

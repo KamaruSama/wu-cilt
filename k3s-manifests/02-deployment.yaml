@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wu-s
+  namespace: wu-s
+  labels:
+    app: wu-s
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wu-s
+  template:
+    metadata:
+      labels:
+        app: wu-s
+    spec:
+      containers:
+      - name: wu-s
+        image: wu-s-app:multi-user-20260927-r15
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: BASE_PATH
+          value: ""
+        - name: NEXT_PUBLIC_BASE_PATH
+          value: ""
+        - name: NODE_ENV
+          value: "production"
+        - name: REDIS_HOST
+          value: "wu-s-redis"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: REDIS_PASSWORD
+        - name: TICKET_REDIS_HOST
+          value: "wu-s-ticket-redis"
+        - name: TICKET_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: TICKET_REDIS_PASSWORD
+        - name: TICKET_RATE_SALT
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: TICKET_RATE_SALT
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3

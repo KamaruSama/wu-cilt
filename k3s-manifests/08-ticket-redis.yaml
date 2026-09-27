@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wu-s-ticket-redis-data
+  namespace: wu-s
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wu-s-ticket-redis
+  namespace: wu-s
+spec:
+  selector:
+    app: wu-s-ticket-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wu-s-ticket-redis
+  namespace: wu-s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wu-s-ticket-redis
+  template:
+    metadata:
+      labels:
+        app: wu-s-ticket-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          args: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--dir", "/data", "--requirepass", "$(TICKET_REDIS_PASSWORD)"]
+          env:
+            - name: TICKET_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: TICKET_REDIS_PASSWORD
+          ports:
+            - name: redis
+              containerPort: 6379
+          volumeMounts:
+            - name: ticket-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          readinessProbe:
+            exec:
+              command: ["sh", "-ec", "redis-cli -a \"$TICKET_REDIS_PASSWORD\" ping | grep -q PONG"]
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-ec", "redis-cli -a \"$TICKET_REDIS_PASSWORD\" ping | grep -q PONG"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: ticket-data
+          persistentVolumeClaim:
+            claimName: wu-s-ticket-redis-data
